@@ -458,6 +458,4 @@ app.listen(PORT, () => {
   console.log(`📦 DB: ${DB_FILE}`);
   console.log(`📋 Đơn hàng hiện có: ${db.orders.length}\n`);
 
-  const baseUrl = process.env.PUBLIC_URL || 'https://guchasa.vitu.com.vn';
-  registerCassoWebhook(baseUrl);
 });
