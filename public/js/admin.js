@@ -44,6 +44,7 @@ document.querySelectorAll('.admin-top nav a[data-tab]').forEach(a => {
     document.querySelectorAll('.tab').forEach(t => t.style.display = 'none');
     document.getElementById('tab-' + a.dataset.tab).style.display = 'block';
     if (a.dataset.tab === 'stats') drawChart();
+    if (a.dataset.tab === 'bank') loadBank();
   });
 });
 
@@ -190,6 +191,44 @@ async function markPaid(id){
 }
 
 function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ─── Bank settings ───────────────────────────────────────────────────────────
+async function loadBank(){
+  const r = await fetch('/api/admin/bank');
+  const j = await r.json();
+  if (!j.success) return;
+  const b = j.data;
+  document.getElementById('bBankName').value = b.bank_name || '';
+  document.getElementById('bBin').value = b.bin || '';
+  document.getElementById('bAccNum').value = b.account_number || '';
+  document.getElementById('bAccName').value = b.account_name || '';
+  document.getElementById('bankCurrent').innerHTML = `
+    <div class="stat-card" style="max-width:400px">
+      <div class="lbl">Tài khoản đang dùng</div>
+      <div style="margin-top:8px;line-height:2">
+        🏦 <b>${b.bank_name}</b><br/>
+        👤 <b>${b.account_name}</b><br/>
+        💳 <b>${b.account_number}</b>
+      </div>
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const bankForm = document.getElementById('bankForm');
+  if (bankForm) bankForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    const r = await fetch('/api/admin/bank', {
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    });
+    const j = await r.json();
+    const msg = document.getElementById('bankMsg');
+    msg.textContent = j.message || (j.success ? 'Đã lưu' : 'Lỗi');
+    msg.className = 'msg ' + (j.success ? 'ok' : 'err');
+    if (j.success) loadBank();
+  });
+});
 
 // ─── Settings ────────────────────────────────────────────────────────────────
 document.getElementById('pwdForm').addEventListener('submit', async e => {

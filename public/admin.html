@@ -26,7 +26,8 @@
     <nav>
       <a href="#" data-tab="orders" class="active">Đơn hàng</a>
       <a href="#" data-tab="stats">Thống kê</a>
-      <a href="#" data-tab="settings">Cài đặt</a>
+      <a href="#" data-tab="bank">🏦 Ngân hàng</a>
+      <a href="#" data-tab="settings">⚙️ Cài đặt</a>
       <button class="btn btn-ghost btn-sm" id="logoutBtn">Đăng xuất</button>
     </nav>
   </header>
@@ -68,6 +69,23 @@
     <h2>Doanh thu 14 ngày gần nhất</h2>
     <div class="chart-wrap"><canvas id="revChart" height="120"></canvas></div>
     <div class="stat-row" id="statRow2"></div>
+  </main>
+
+  <!-- Bank tab -->
+  <main class="tab" id="tab-bank" style="display:none">
+    <h2>🏦 Thông tin tài khoản nhận tiền</h2>
+    <form id="bankForm" class="form-card">
+      <label>Ngân hàng (tên hiển thị)<input name="bank_name" id="bBankName" placeholder="MB Bank - Ngân hàng Quân đội"/></label>
+      <label>Mã BIN ngân hàng (dùng cho VietQR)<input name="bin" id="bBin" placeholder="970422"/></label>
+      <label>Số tài khoản *<input name="account_number" id="bAccNum" placeholder="36911021102" required/></label>
+      <label>Tên chủ tài khoản (IN HOA) *<input name="account_name" id="bAccName" placeholder="NGUYEN VAN HUY" required/></label>
+      <div style="background:#e8f4ea;padding:12px;border-radius:8px;font-size:.85rem;margin:10px 0">
+        ⚠️ Sau khi lưu, tất cả QR thanh toán mới sẽ dùng tài khoản này. Đơn cũ không ảnh hưởng.
+      </div>
+      <button class="btn btn-primary">💾 Lưu thông tin ngân hàng</button>
+      <div id="bankMsg" class="msg"></div>
+    </form>
+    <div id="bankCurrent" style="margin-top:20px"></div>
   </main>
 
   <!-- Settings tab -->

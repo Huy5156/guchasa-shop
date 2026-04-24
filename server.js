@@ -119,7 +119,7 @@ app.get('/api/config', (req, res) => {
 
 app.post('/api/orders', (req, res) => {
   try {
-    const { full_name, phone, email, address, province, quantity, note } = req.body;
+    const { full_name, phone, email, address, province, district, ward, full_address, quantity, note } = req.body;
     if (!full_name?.trim() || !phone?.trim() || !address?.trim() || !province?.trim()) {
       return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ thông tin bắt buộc' });
     }
@@ -139,8 +139,10 @@ app.post('/api/orders', (req, res) => {
       full_name: full_name.trim(),
       phone: phone.trim().replace(/\s/g, ''),
       email: email?.trim() || '',
-      address: address.trim(),
+      address: (full_address || address || '').trim(),
       province: province.trim(),
+      district: district?.trim() || '',
+      ward: ward?.trim() || '',
       quantity: qty,
       note: note?.trim() || '',
       total_amount: total,
@@ -176,6 +178,17 @@ app.get('/api/orders/:code/status', (req, res) => {
   const order = db.orders.find(o => o.order_code === req.params.code);
   if (!order) return res.json({ success: false, paid: false });
   res.json({ success: true, paid: order.status === 'paid' || order.status === 'confirmed' || order.status === 'shipping' || order.status === 'delivered', status: order.status });
+});
+
+app.get('/api/orders/by-phone/:phone', (req, res) => {
+  const db = readDB();
+  const orders = db.orders.filter(o => o.phone === req.params.phone).slice(-10).reverse();
+  if (!orders.length) return res.json({ success: false, message: 'Không tìm thấy đơn' });
+  res.json({ success: true, data: orders.map(o => ({
+    order_code: o.order_code, full_name: o.full_name, phone: o.phone,
+    address: o.address, province: o.province, quantity: o.quantity,
+    total_amount: o.total_amount, status: o.status, created_at: o.created_at
+  }))});
 });
 
 app.get('/api/orders/:code', (req, res) => {
@@ -300,6 +313,20 @@ app.put('/api/admin/orders/:id', requireAdmin, (req, res) => {
   order.updated_at = nowStr();
   writeDB(db);
   res.json({ success: true });
+});
+
+app.get('/api/admin/bank', requireAdmin, (req, res) => {
+  res.json({ success: true, data: BANK });
+});
+
+app.put('/api/admin/bank', requireAdmin, (req, res) => {
+  const { account_number, account_name, bank_name, bin } = req.body;
+  if (!account_number?.trim() || !account_name?.trim()) return res.status(400).json({ success: false, message: 'Thiếu số TK hoặc tên TK' });
+  BANK.account_number = account_number.trim();
+  BANK.account_name = account_name.trim().toUpperCase();
+  if (bank_name) BANK.bank_name = bank_name.trim();
+  if (bin) BANK.bin = bin.trim();
+  res.json({ success: true, message: 'Đã cập nhật thông tin ngân hàng' });
 });
 
 app.put('/api/admin/password', requireAdmin, (req, res) => {

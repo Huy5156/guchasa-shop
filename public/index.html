@@ -26,10 +26,6 @@
   </div>
 </div>
 
-<div class="expiry-banner">
-  📅 <b>Công bố công khai:</b> Lô hàng hiện tại HSD còn <b>hơn 2 tháng</b> - vì vậy giảm giá sâu. Dùng trong 30-60 ngày là hết chai, đặt hàng = đồng ý với điều khoản này.
-</div>
-
 <header class="topbar">
   <div class="container topbar-row">
     <div class="brand">
@@ -40,6 +36,7 @@
       <a href="#product">Sản phẩm</a>
       <a href="#benefit">Công dụng</a>
       <a href="#review">Đánh giá</a>
+      <a href="#" onclick="document.getElementById('trackModal').classList.add('show');return false" class="btn btn-ghost btn-sm" style="margin-right:6px">📦 Đơn hàng</a>
       <a href="#order" class="btn btn-primary btn-sm">Đặt hàng</a>
     </nav>
   </div>
@@ -90,13 +87,13 @@
         <div class="price-note">✓ Càng mua nhiều càng rẻ &nbsp;•&nbsp; ✓ Miễn phí vận chuyển &nbsp;•&nbsp; ✓ Kiểm tra trước khi nhận</div>
         <div class="price-warn">
           <b>📅 THÔNG BÁO HẠN SỬ DỤNG - Vui lòng đọc kỹ trước khi đặt:</b><br/>
-          Đây là chương trình <b>xả kho tri ân</b>. Lô hàng hiện tại có <b>hạn sử dụng còn hơn 2 tháng</b> kể từ ngày bạn nhận hàng (tức khoảng 60-75 ngày). Chất lượng, công dụng và mùi hương <b>hoàn toàn không đổi</b>. Trung bình 1 chai 500ml dùng được 1,5-2 tháng, nên mua về dùng là vừa vặn kịp trước hạn. Chúng tôi <b>không nhận đổi trả với lý do cận date</b> vì đã công bố công khai ngay từ đầu. Xin cảm ơn bạn đã thông cảm và ủng hộ! 🙏
+          Đây là chương trình <b>xả kho tri ân</b>. Lô hàng hiện tại có <b>hạn sử dụng còn hơn 2 tháng</b> kể từ ngày bạn nhận hàng (tức khoảng 50-60 ngày). Chất lượng, công dụng và mùi hương <b>hoàn toàn không đổi</b>. Trung bình 1 chai 500ml dùng được 1,5-2 tháng, nên mua về dùng là vừa vặn kịp trước hạn. Chúng tôi <b>không nhận đổi trả với lý do cận date</b> vì đã công bố công khai ngay từ đầu. Xin cảm ơn bạn đã thông cảm và ủng hộ! 🙏
         </div>
       </div>
 
       <div class="hero-cta">
         <a href="#order" class="btn btn-primary btn-lg">🛒 Đặt ngay - 5 chai chỉ 219k</a>
-        <a href="tel:0369110211" class="btn btn-ghost btn-lg">📞 Gọi tư vấn</a>
+        <a href="tel:0981936699" class="btn btn-ghost btn-lg">📞 Gọi tư vấn</a>
       </div>
 
       <ul class="hero-trust">
@@ -192,11 +189,26 @@
           <label>Họ và tên *<input name="full_name" required placeholder="Nguyễn Văn A" /></label>
           <label>Số điện thoại *<input name="phone" required placeholder="0901234567" /></label>
         </div>
+        <label>Email<input type="email" name="email" placeholder="email@gmail.com (tuỳ chọn)" /></label>
+
         <div class="row">
-          <label>Email<input type="email" name="email" placeholder="email@gmail.com" /></label>
-          <label>Tỉnh/Thành phố *<input name="province" required placeholder="Hà Nội" /></label>
+          <label>Tỉnh/Thành phố *
+            <select name="province" id="selProvince" required>
+              <option value="">-- Chọn tỉnh/thành --</option>
+            </select>
+          </label>
+          <label>Quận/Huyện *
+            <select name="district" id="selDistrict" required disabled>
+              <option value="">-- Chọn quận/huyện --</option>
+            </select>
+          </label>
         </div>
-        <label>Địa chỉ nhận hàng *<input name="address" required placeholder="Số nhà, đường, phường, quận" /></label>
+        <label>Phường/Xã *
+          <select name="ward" id="selWard" required disabled>
+            <option value="">-- Chọn phường/xã --</option>
+          </select>
+        </label>
+        <label>Số nhà, tên đường *<input name="address" required placeholder="VD: 123 Nguyễn Trãi" /></label>
 
         <label>Số lượng (chai 500ml) - chọn combo càng lớn càng rẻ
           <select name="quantity" id="quantity">
@@ -214,7 +226,7 @@
 
         <label class="checkbox-line">
           <input type="checkbox" id="agreeExpiry" required />
-          <span>Tôi đã đọc và <b>đồng ý</b> với việc sản phẩm có hạn sử dụng còn hơn <b>2 tháng</b> kể từ ngày nhận hàng, và không khiếu nại về vấn đề cận date.</span>
+          <span>Tôi đã đọc và <b>đồng ý</b> với việc sản phẩm có hạn sử dụng còn <b>50-60 ngày</b> kể từ ngày nhận hàng, và không khiếu nại về vấn đề cận date.</span>
         </label>
 
         <div class="total-line">
@@ -244,6 +256,28 @@
     </aside>
   </div>
 </section>
+
+<!-- Banner HSD cuối trang -->
+<div class="expiry-footer">
+  <div class="container">
+    <b>📅 Công bố công khai về hạn sử dụng:</b> Lô hàng hiện tại có HSD còn <b>50-60 ngày</b> kể từ ngày nhận hàng. Chất lượng sản phẩm hoàn toàn không đổi. 1 chai 500ml dùng trong 30-45 ngày là hết. Đặt hàng đồng nghĩa với việc bạn đã đọc và chấp nhận điều này. Hotline/Zalo: <b>0981.936.699</b>
+  </div>
+</div>
+
+<!-- Tra cứu đơn hàng -->
+<div class="modal" id="trackModal">
+  <div class="modal-inner">
+    <button class="modal-close" onclick="document.getElementById('trackModal').classList.remove('show')">×</button>
+    <h2>🔍 Tra cứu đơn hàng</h2>
+    <div class="form">
+      <label>Nhập mã đơn hàng (GCSxxxxxxxx) hoặc số điện thoại
+        <input id="trackInput" placeholder="GCS20260424xxxx hoặc 09xxxxxxxx" />
+      </label>
+      <button class="btn btn-primary w-full" onclick="doTrack()" style="margin-top:10px">Tra cứu</button>
+    </div>
+    <div id="trackResult" style="margin-top:16px"></div>
+  </div>
+</div>
 
 <!-- Modal QR thanh toán -->
 <div class="modal" id="qrModal">
@@ -276,6 +310,7 @@
 </div>
 
 
+<script src="/js/vn-address.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/dynamic.js"></script>
 </body>

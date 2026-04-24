@@ -12,7 +12,15 @@ h1{font-size:2.2rem;margin:.4em 0}
 h2{font-size:1.8rem;margin:0 0 .6em;text-align:center}
 .section-lead{text-align:center;max-width:760px;margin:0 auto 30px;color:var(--muted)}
 
-.expiry-banner{background:#fff3cd;color:#5a4500;padding:10px 16px;text-align:center;font-size:.9rem;border-bottom:2px solid #c79a3a;line-height:1.4}
+.expiry-footer{background:#fff3cd;color:#5a4500;padding:14px 0;font-size:.88rem;border-top:2px solid #c79a3a;line-height:1.5;text-align:center}
+.expiry-footer .container{max-width:860px}
+.track-card{background:#f7f4ea;border:1px solid #dde0c8;border-radius:10px;padding:16px;margin-bottom:12px;font-size:.95rem;line-height:1.7}
+.track-card div{margin-bottom:2px}
+.track-status{margin-top:6px;color:var(--green-dark);font-weight:600}
+
+/* address selects */
+.form select{width:100%;padding:11px 12px;border:1px solid #d4cdba;border-radius:8px;font-size:1rem;font-family:inherit;background:#fff;margin-top:4px;color:#1f2937}
+.form select:disabled{background:#f5f5f5;color:#aaa}
 .checkbox-line{display:flex!important;align-items:flex-start;gap:10px;background:#fff7e5;padding:12px 14px;border-radius:8px;border:1px solid #c79a3a;margin:12px 0;font-weight:500!important;font-size:.9rem!important;cursor:pointer}
 .checkbox-line input{width:auto!important;margin:3px 0 0!important;flex:0 0 auto!important}
 .checkbox-line span{flex:1;line-height:1.45}
