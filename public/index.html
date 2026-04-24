@@ -279,7 +279,10 @@
     <p>Vui lòng quét mã QR để chuyển khoản. Đơn hàng tự động xác nhận khi chúng tôi nhận được tiền.</p>
 
     <div class="qr-grid">
-      <div class="qr-img"><img id="qrImg" alt="QR thanh toán"/></div>
+      <div class="qr-img">
+        <img id="qrImg" alt="QR thanh toán"/>
+        <a id="qrDownload" download="QR-GuChaSa.png" style="display:block;margin-top:8px;text-align:center;font-size:.85rem;color:var(--green-dark);font-weight:600;cursor:pointer">⬇ Lưu QR về máy</a>
+      </div>
       <div class="qr-info">
         <div><label>Ngân hàng</label><b id="qrBank">MB Bank</b></div>
         <div><label>Chủ tài khoản</label><b id="qrName">NGUYEN VAN HUY</b></div>
