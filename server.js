@@ -3,6 +3,7 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -50,6 +51,26 @@ function buildQRUrl(amount, addInfo) {
     accountName: BANK.account_name
   });
   return `${base}?${params.toString()}`;
+}
+
+// ─── Casso auto-payment ───────────────────────────────────────────────────────
+const CASSO_API_KEY = process.env.CASSO_API_KEY || '938b202e-ada5-4c30-b740-a0fafa6f8571';
+const CASSO_SECURE_TOKEN = process.env.CASSO_SECURE_TOKEN || 'guchasa-webhook-2026';
+
+function registerCassoWebhook(baseUrl) {
+  const body = JSON.stringify({ webhook: baseUrl + '/api/casso/webhook', key: CASSO_SECURE_TOKEN });
+  const options = {
+    hostname: 'oauth.casso.vn', port: 443, path: '/v2/config',
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Apikey ' + CASSO_API_KEY, 'Content-Length': Buffer.byteLength(body) }
+  };
+  const req = https.request(options, res => {
+    let d = '';
+    res.on('data', c => d += c);
+    res.on('end', () => console.log('[Casso] Webhook registered:', d));
+  });
+  req.on('error', e => console.error('[Casso] Register error:', e.message));
+  req.write(body); req.end();
 }
 
 const DB_FILE = process.env.DATA_FILE || path.join(__dirname, 'data.json');
@@ -358,6 +379,28 @@ app.get('/api/admin/export', requireAdmin, (req, res) => {
   res.send('﻿' + csv);
 });
 
+// ─── Casso webhook ───────────────────────────────────────────────────────────
+app.post('/api/casso/webhook', (req, res) => {
+  const { key, data } = req.body;
+  if (key !== CASSO_SECURE_TOKEN) return res.json({ error: 1 });
+  const transactions = data?.records || [];
+  const db = readDB();
+  let changed = false;
+  transactions.forEach(tx => {
+    const desc = (tx.description || '').toUpperCase();
+    const order = db.orders.find(o => o.status === 'pending' && desc.includes(o.order_code.toUpperCase()));
+    if (order && tx.amount >= order.total_amount) {
+      order.status = 'paid';
+      order.paid_at = nowStr();
+      order.updated_at = nowStr();
+      changed = true;
+      console.log('[Casso] Auto-paid:', order.order_code, tx.amount);
+    }
+  });
+  if (changed) writeDB(db);
+  res.json({ error: 0 });
+});
+
 // ─── Start ───────────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   const db = readDB();
@@ -365,4 +408,7 @@ app.listen(PORT, () => {
   console.log('📊 Admin dashboard:           http://localhost:' + PORT + '/admin.html');
   console.log(`📦 DB: ${DB_FILE}`);
   console.log(`📋 Đơn hàng hiện có: ${db.orders.length}\n`);
+
+  const baseUrl = process.env.PUBLIC_URL || 'https://guchasa.vitu.com.vn';
+  registerCassoWebhook(baseUrl);
 });
