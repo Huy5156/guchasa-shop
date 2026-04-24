@@ -68,24 +68,43 @@ function buildQRUrl(amount, addInfo) {
   return `${base}?${params.toString()}`;
 }
 
-// ─── Casso auto-payment ───────────────────────────────────────────────────────
-const CASSO_API_KEY = process.env.CASSO_API_KEY || '938b202e-ada5-4c30-b740-a0fafa6f8571';
-const CASSO_SECURE_TOKEN = process.env.CASSO_SECURE_TOKEN || 'guchasa-webhook-2026';
+// ─── PayOS ────────────────────────────────────────────────────────────────────
+const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID || '47e95fd3-bde6-4829-90cd-363629d51c13';
+const PAYOS_API_KEY   = process.env.PAYOS_API_KEY   || 'f2dbc87c-339c-41c5-a584-e7c90dc71b64';
+const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || 'e02942532d2ee7693ce794fd40db060e91ca2adaf0d4c0c8065f081c0fb7fd3a';
+const crypto = require('crypto');
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://guchasa.vitu.com.vn';
 
-function registerCassoWebhook(baseUrl) {
-  const body = JSON.stringify({ webhook: baseUrl + '/api/casso/webhook', key: CASSO_SECURE_TOKEN });
-  const options = {
-    hostname: 'oauth.casso.vn', port: 443, path: '/v2/config',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Apikey ' + CASSO_API_KEY, 'Content-Length': Buffer.byteLength(body) }
-  };
-  const req = https.request(options, res => {
-    let d = '';
-    res.on('data', c => d += c);
-    res.on('end', () => console.log('[Casso] Webhook registered:', d));
+function payosSign(data) {
+  const sorted = Object.keys(data).sort().map(k => `${k}=${data[k]}`).join('&');
+  return crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(sorted).digest('hex');
+}
+
+async function createPayOSLink(orderCode, amount, description) {
+  const numericCode = parseInt(orderCode.replace(/\D/g, '')) || Date.now() % 9999999999;
+  const dataToSign = { amount, cancelUrl: PUBLIC_URL, description, orderCode: numericCode, returnUrl: PUBLIC_URL };
+  const signature = payosSign(dataToSign);
+  const body = JSON.stringify({ ...dataToSign, signature });
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'api-merchant.payos.vn', port: 443,
+      path: '/v2/payment-requests', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-client-id': PAYOS_CLIENT_ID, 'x-api-key': PAYOS_API_KEY, 'Content-Length': Buffer.byteLength(body) }
+    };
+    const req = https.request(options, res => {
+      let d = '';
+      res.on('data', c => d += c);
+      res.on('end', () => {
+        try {
+          const j = JSON.parse(d);
+          if (j.code === '00') resolve({ qrCode: j.data.qrCode, paymentLinkId: j.data.paymentLinkId, numericCode });
+          else { console.error('[PayOS]', d); resolve(null); }
+        } catch { resolve(null); }
+      });
+    });
+    req.on('error', e => { console.error('[PayOS]', e.message); resolve(null); });
+    req.write(body); req.end();
   });
-  req.on('error', e => console.error('[Casso] Register error:', e.message));
-  req.write(body); req.end();
 }
 
 const DB_FILE = process.env.DATA_FILE || '/app/data/data.json';
@@ -153,7 +172,7 @@ app.get('/api/config', (req, res) => {
   });
 });
 
-app.post('/api/orders', (req, res) => {
+app.post('/api/orders', async (req, res) => {
   try {
     const { full_name, phone, email, address, province, district, ward, full_address, quantity, note } = req.body;
     if (!full_name?.trim() || !phone?.trim() || !address?.trim() || !province?.trim()) {
@@ -189,7 +208,13 @@ app.post('/api/orders', (req, res) => {
     db.orders.push(order);
     writeDB(db);
 
-    const qrUrl = buildQRUrl(total, orderCode);
+    // Tạo PayOS payment link
+    const payos = await createPayOSLink(orderCode, total, orderCode);
+    const qrUrl = payos?.qrCode
+      ? `https://img.vietqr.io/image/${payos.qrCode}`
+      : buildQRUrl(total, orderCode);
+    if (payos) order.payos_code = payos.numericCode;
+    writeDB(db);
 
     res.json({
       success: true,
@@ -198,7 +223,7 @@ app.post('/api/orders', (req, res) => {
         order_code: orderCode,
         total_amount: total,
         quantity: qty,
-        qr_url: qrUrl,
+        qr_url: payos?.qrCode || buildQRUrl(total, orderCode),
         bank: getBank(),
         transfer_content: orderCode
       }
@@ -399,29 +424,21 @@ app.get('/api/admin/export', requireAdmin, (req, res) => {
 });
 
 // ─── PayOS webhook ───────────────────────────────────────────────────────────
-const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || 'e02942532d2ee7693ce794fd40db060e91ca2adaf0d4c0c8065f081c0fb7fd3a';
-const crypto = require('crypto');
-
-function verifyPayOSSignature(data, signature) {
-  const sortedKeys = Object.keys(data).sort();
-  const str = sortedKeys.map(k => `${k}=${data[k]}`).join('&');
-  const expected = crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(str).digest('hex');
-  return expected === signature;
-}
-
 app.post('/api/casso/webhook', (req, res) => {
   console.log('[PayOS] Webhook received:', JSON.stringify(req.body).slice(0, 500));
   const body = req.body;
-
-  // PayOS format: { code, desc, success, data: { description, amount, ... }, signature }
   if (body.code === '00' && body.data) {
     const d = body.data;
     const desc = (d.description || '').toUpperCase();
     const amount = d.amount || 0;
     console.log('[PayOS] TX:', desc, amount);
-
     const db = readDB();
-    const order = db.orders.find(o => o.status === 'pending' && desc.includes(o.order_code.toUpperCase()));
+    const order = db.orders.find(o =>
+      o.status === 'pending' && (
+        desc.includes(o.order_code.toUpperCase()) ||
+        (o.payos_code && d.orderCode == o.payos_code)
+      )
+    );
     if (order && amount >= order.total_amount) {
       order.status = 'paid';
       order.paid_at = nowStr();
@@ -430,7 +447,6 @@ app.post('/api/casso/webhook', (req, res) => {
       console.log('[PayOS] Auto-paid:', order.order_code, amount);
     }
   }
-
   res.json({ code: '00', desc: 'success' });
 });
 
