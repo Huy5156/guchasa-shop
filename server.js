@@ -145,6 +145,17 @@ app.use(session({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ─── QR proxy (bypass CORS for download) ─────────────────────────────────────
+app.get('/api/qr-proxy', (req, res) => {
+  const url = req.query.url;
+  if (!url || !url.startsWith('https://img.vietqr.io/')) return res.status(400).end();
+  https.get(url, r => {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', 'attachment; filename="QR-GuchaSa.png"');
+    r.pipe(res);
+  }).on('error', () => res.status(500).end());
+});
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function genOrderCode() {
   const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -208,13 +219,9 @@ app.post('/api/orders', async (req, res) => {
     db.orders.push(order);
     writeDB(db);
 
-    // Tạo PayOS payment link
+    // Tạo PayOS payment link (để nhận webhook tự động)
     const payos = await createPayOSLink(orderCode, total, orderCode);
-    const qrUrl = payos?.qrCode
-      ? `https://img.vietqr.io/image/${payos.qrCode}`
-      : buildQRUrl(total, orderCode);
-    if (payos) order.payos_code = payos.numericCode;
-    writeDB(db);
+    if (payos) { order.payos_code = payos.numericCode; writeDB(db); }
 
     res.json({
       success: true,
@@ -223,7 +230,7 @@ app.post('/api/orders', async (req, res) => {
         order_code: orderCode,
         total_amount: total,
         quantity: qty,
-        qr_url: payos?.qrCode || buildQRUrl(total, orderCode),
+        qr_url: buildQRUrl(total, orderCode),
         bank: getBank(),
         transfer_content: orderCode
       }

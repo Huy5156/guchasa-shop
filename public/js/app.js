@@ -67,7 +67,8 @@ function showQR(d){
   document.getElementById('qrName').textContent = d.bank.account_name;
   document.getElementById('qrBank').textContent = d.bank.bank_name;
   const dl = document.getElementById('qrDownload');
-  dl.href = d.qr_url; dl.download = 'QR-' + d.order_code + '.png';
+  dl.href = '/api/qr-proxy?url=' + encodeURIComponent(d.qr_url);
+  dl.download = 'QR-' + d.order_code + '.png';
   document.getElementById('statusWait').style.display = 'flex';
   document.getElementById('statusOk').style.display = 'none';
   document.getElementById('qrModal').classList.add('show');
