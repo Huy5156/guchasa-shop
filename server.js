@@ -148,7 +148,7 @@ app.get('/api/config', (req, res) => {
     success: true,
     data: {
       product: PRODUCT,
-      bank: { ...BANK }
+      bank: getBank()
     }
   });
 });
@@ -199,7 +199,7 @@ app.post('/api/orders', (req, res) => {
         total_amount: total,
         quantity: qty,
         qr_url: qrUrl,
-        bank: BANK,
+        bank: getBank(),
         transfer_content: orderCode
       }
     });
@@ -241,7 +241,7 @@ app.get('/api/orders/:code', (req, res) => {
     total_amount: order.total_amount,
     status: order.status,
     qr_url: buildQRUrl(order.total_amount, order.order_code),
-    bank: BANK,
+    bank: getBank(),
     created_at: order.created_at
   }});
 });
@@ -352,7 +352,7 @@ app.put('/api/admin/orders/:id', requireAdmin, (req, res) => {
 });
 
 app.get('/api/admin/bank', requireAdmin, (req, res) => {
-  res.json({ success: true, data: BANK });
+  res.json({ success: true, data: getBank() });
 });
 
 app.put('/api/admin/bank', requireAdmin, (req, res) => {
