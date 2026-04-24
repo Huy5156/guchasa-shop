@@ -88,7 +88,7 @@ function registerCassoWebhook(baseUrl) {
   req.write(body); req.end();
 }
 
-const DB_FILE = process.env.DATA_FILE || path.join(__dirname, 'data.json');
+const DB_FILE = process.env.DATA_FILE || '/app/data/data.json';
 const DB_DIR = path.dirname(DB_FILE);
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 
