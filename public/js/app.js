@@ -1,34 +1,11 @@
 const TIERS = {1:100000, 2:180000, 3:240000, 5:219000, 10:350000, 15:500000, 20:650000};
 const fmt = n => n.toLocaleString('vi-VN') + 'đ';
 
-// ── Dropdown địa chỉ ─────────────────────────────────────────────────────────
+// ── Dropdown tỉnh/thành ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const selP = document.getElementById('selProvince');
-  const selD = document.getElementById('selDistrict');
-  const selW = document.getElementById('selWard');
   if (!selP || !window.VN_ADDRESS) return;
-
-  Object.keys(VN_ADDRESS).sort().forEach(p => {
-    selP.appendChild(new Option(p, p));
-  });
-
-  selP.addEventListener('change', () => {
-    selD.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
-    selW.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
-    selD.disabled = !selP.value;
-    selW.disabled = true;
-    if (!selP.value) return;
-    const districts = VN_ADDRESS[selP.value] || {};
-    Object.keys(districts).sort().forEach(d => selD.appendChild(new Option(d, d)));
-  });
-
-  selD.addEventListener('change', () => {
-    selW.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
-    selW.disabled = !selD.value;
-    if (!selD.value) return;
-    const wards = (VN_ADDRESS[selP.value] || {})[selD.value] || [];
-    wards.sort().forEach(w => selW.appendChild(new Option(w, w)));
-  });
+  Object.keys(VN_ADDRESS).sort().forEach(p => selP.appendChild(new Option(p, p)));
 });
 
 // ── Tổng tiền ────────────────────────────────────────────────────────────────
