@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/ADMIN/.claude/projects/d--guchasa/memory//**)",
+      "Read(//c/Users/ADMIN/.claude/projects/d--guchasa/memory/**)",
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(node server.js)"
+    ]
+  }
+}

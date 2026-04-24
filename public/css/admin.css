@@ -1,0 +1,80 @@
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#f4f6f8;color:#1f2937}
+a{color:#2f7a3a;text-decoration:none}
+h1,h2{color:#1e5427}
+
+/* login */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2f7a3a,#1e5427)}
+.login-card{background:#fff;padding:36px;border-radius:14px;width:360px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.login-card h1{margin:0 0 4px}
+.login-card p{color:#6b7280;margin:0 0 18px}
+.login-card input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:1rem;margin-bottom:12px}
+.login-card button{width:100%}
+.err{color:#d0342c;margin-top:10px;font-size:.9rem}
+
+/* buttons shared */
+.btn{border:0;border-radius:8px;padding:10px 16px;cursor:pointer;font-weight:600;display:inline-block}
+.btn-primary{background:#d0342c;color:#fff}
+.btn-primary:hover{background:#b7231c}
+.btn-ghost{background:#fff;border:1px solid #ccc;color:#333}
+.btn-ghost:hover{background:#f2f2f2}
+.btn-sm{padding:7px 12px;font-size:.88rem}
+
+/* topbar */
+.admin-top{background:#1e5427;color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.admin-top .brand{font-size:1.2rem;font-weight:700}
+.admin-top nav a{color:#d8e9d3;margin-right:18px;padding:6px 4px;border-bottom:2px solid transparent}
+.admin-top nav a.active{color:#fff;border-bottom-color:#c79a3a}
+
+.tab{padding:24px}
+
+/* stats */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border-radius:10px;padding:16px;border-left:4px solid #2f7a3a}
+.stat-card .lbl{color:#6b7280;font-size:.85rem;text-transform:uppercase;letter-spacing:1px}
+.stat-card .val{font-size:1.5rem;font-weight:700;margin-top:4px;color:#1e5427}
+.stat-card.orange{border-left-color:#e69224}
+.stat-card.red{border-left-color:#d0342c}
+.stat-card.blue{border-left-color:#2a6db0}
+
+/* toolbar + table */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input,.toolbar select{padding:8px 12px;border:1px solid #ccc;border-radius:8px;font-size:.95rem}
+.toolbar input{flex:1;min-width:180px}
+.table-wrap{background:#fff;border-radius:10px;overflow:auto;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+table{width:100%;border-collapse:collapse;min-width:900px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:left;font-size:.92rem;vertical-align:middle}
+th{background:#f9f9f9;font-weight:600;color:#555;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px}
+tr:hover{background:#fafbf8}
+.pill{padding:4px 10px;border-radius:12px;font-size:.78rem;font-weight:600;display:inline-block;white-space:nowrap}
+.p-pending{background:#fff3cd;color:#856404}
+.p-paid{background:#d4edda;color:#155724}
+.p-confirmed{background:#d1ecf1;color:#0c5460}
+.p-shipping{background:#cce5ff;color:#004085}
+.p-delivered{background:#d4edda;color:#155724}
+.p-cancelled{background:#f8d7da;color:#721c24}
+
+select.status-sel{padding:4px 6px;font-size:.85rem;border:1px solid #ddd;border-radius:6px}
+
+.empty{text-align:center;padding:40px;color:#888}
+
+.pager{margin-top:14px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.pager button{padding:6px 10px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer}
+.pager button.active{background:#1e5427;color:#fff;border-color:#1e5427}
+
+/* modal */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;overflow-y:auto;padding:20px}
+.modal.show{display:block}
+.modal-inner{background:#fff;max-width:640px;margin:30px auto;border-radius:12px;padding:28px;position:relative}
+.modal-close{position:absolute;top:8px;right:14px;background:none;border:0;font-size:1.8rem;cursor:pointer;color:#999}
+.detail-grid{display:grid;grid-template-columns:120px 1fr;gap:8px 14px;margin:14px 0}
+.detail-grid label{color:#6b7280;font-size:.85rem;text-transform:uppercase;letter-spacing:1px}
+
+.form-card{background:#fff;padding:24px;border-radius:10px;max-width:480px}
+.form-card label{display:block;margin:10px 0;font-weight:600}
+.form-card input{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;margin-top:4px;font-size:1rem}
+.msg{margin-top:10px;font-size:.9rem}
+.msg.ok{color:#1e5427}
+.msg.err{color:#d0342c}
+
+.chart-wrap{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px}
