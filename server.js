@@ -400,20 +400,34 @@ app.get('/api/admin/export', requireAdmin, (req, res) => {
 
 // ─── Casso webhook ───────────────────────────────────────────────────────────
 app.post('/api/casso/webhook', (req, res) => {
-  const { key, data } = req.body;
-  if (key !== CASSO_SECURE_TOKEN) return res.json({ error: 1 });
-  const transactions = data?.records || [];
+  console.log('[Casso] Webhook received:', JSON.stringify(req.body).slice(0, 500));
+  const body = req.body;
+
+  // Casso gửi trực tiếp 1 giao dịch hoặc mảng trong data.records
+  let transactions = [];
+  if (Array.isArray(body)) {
+    transactions = body;
+  } else if (body.data?.records) {
+    transactions = body.data.records;
+  } else if (body.id || body.tid || body.amount) {
+    transactions = [body];
+  } else if (body.data && (body.data.id || body.data.amount)) {
+    transactions = [body.data];
+  }
+
   const db = readDB();
   let changed = false;
   transactions.forEach(tx => {
-    const desc = (tx.description || '').toUpperCase();
+    const desc = (tx.description || tx.info || '').toUpperCase();
+    const amount = tx.amount || tx.value || 0;
+    console.log('[Casso] TX:', desc, amount);
     const order = db.orders.find(o => o.status === 'pending' && desc.includes(o.order_code.toUpperCase()));
-    if (order && tx.amount >= order.total_amount) {
+    if (order && amount >= order.total_amount) {
       order.status = 'paid';
       order.paid_at = nowStr();
       order.updated_at = nowStr();
       changed = true;
-      console.log('[Casso] Auto-paid:', order.order_code, tx.amount);
+      console.log('[Casso] Auto-paid:', order.order_code, amount);
     }
   });
   if (changed) writeDB(db);
