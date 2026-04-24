@@ -13,7 +13,10 @@
   <form id="loginForm" class="login-card">
     <h1>🌿 GưChaSa Admin</h1>
     <p>Đăng nhập để quản lý đơn hàng</p>
-    <input type="password" name="password" placeholder="Mật khẩu" required autofocus/>
+    <div style="position:relative">
+      <input type="password" name="password" id="pwdInput" placeholder="Mật khẩu" required autofocus style="width:100%;padding-right:44px;box-sizing:border-box"/>
+      <button type="button" onclick="togglePwd()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#888;padding:0" id="eyeBtn">👁</button>
+    </div>
     <button type="submit" class="btn btn-primary">Đăng nhập</button>
     <div id="loginErr" class="err"></div>
   </form>
@@ -107,6 +110,14 @@
   </div>
 </div>
 
+<script>
+function togglePwd(){
+  const i = document.getElementById('pwdInput');
+  const b = document.getElementById('eyeBtn');
+  if(i.type==='password'){ i.type='text'; b.textContent='🙈'; }
+  else { i.type='password'; b.textContent='👁'; }
+}
+</script>
 <script src="/js/admin.js"></script>
 </body>
 </html>
