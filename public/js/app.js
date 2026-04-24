@@ -63,6 +63,9 @@ function showQR(d){
   document.getElementById('qrAmt').textContent = fmt(d.total_amount);
   document.getElementById('qrDesc').textContent = d.transfer_content;
   document.getElementById('orderCode').textContent = d.order_code;
+  document.getElementById('qrAcc').textContent = d.bank.account_number;
+  document.getElementById('qrName').textContent = d.bank.account_name;
+  document.getElementById('qrBank').textContent = d.bank.bank_name;
   document.getElementById('statusWait').style.display = 'flex';
   document.getElementById('statusOk').style.display = 'none';
   document.getElementById('qrModal').classList.add('show');

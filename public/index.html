@@ -281,9 +281,9 @@
     <div class="qr-grid">
       <div class="qr-img"><img id="qrImg" alt="QR thanh toán"/></div>
       <div class="qr-info">
-        <div><label>Ngân hàng</label><b>MB Bank</b></div>
-        <div><label>Chủ tài khoản</label><b>NGUYEN VAN HUY</b></div>
-        <div><label>Số tài khoản</label><b id="qrAcc">36911021102</b> <button onclick="copy('36911021102')">Copy</button></div>
+        <div><label>Ngân hàng</label><b id="qrBank">MB Bank</b></div>
+        <div><label>Chủ tài khoản</label><b id="qrName">NGUYEN VAN HUY</b></div>
+        <div><label>Số tài khoản</label><b id="qrAcc"></b> <button onclick="copy(document.getElementById('qrAcc').textContent)">Copy</button></div>
         <div><label>Số tiền</label><b id="qrAmt"></b></div>
         <div><label>Nội dung CK <span class="red">(BẮT BUỘC)</span></label><b id="qrDesc"></b> <button onclick="copy(document.getElementById('qrDesc').textContent)">Copy</button></div>
       </div>
