@@ -36,12 +36,27 @@ function priceFor(qty){
   return Math.round(unit * qty);
 }
 
-const BANK = {
-  bin: '970422',              // MB Bank
+const BANK_DEFAULT = {
+  bin: '970422',
   account_number: '36911021102',
   account_name: 'NGUYEN VAN HUY',
   bank_name: 'MB Bank - Ngân hàng Quân đội'
 };
+
+function getBank() {
+  const db = readDB();
+  return Object.assign({}, BANK_DEFAULT, db.settings?.bank || {});
+}
+function saveBank(data) {
+  const db = readDB();
+  db.settings.bank = data;
+  writeDB(db);
+}
+// proxy object — đọc/ghi đều qua DB
+const BANK = new Proxy({}, {
+  get(_, k) { return getBank()[k]; },
+  set(_, k, v) { const b = getBank(); b[k] = v; saveBank(b); return true; }
+});
 
 function buildQRUrl(amount, addInfo) {
   const base = `https://img.vietqr.io/image/${BANK.bin}-${BANK.account_number}-compact2.png`;
@@ -343,10 +358,14 @@ app.get('/api/admin/bank', requireAdmin, (req, res) => {
 app.put('/api/admin/bank', requireAdmin, (req, res) => {
   const { account_number, account_name, bank_name, bin } = req.body;
   if (!account_number?.trim() || !account_name?.trim()) return res.status(400).json({ success: false, message: 'Thiếu số TK hoặc tên TK' });
-  BANK.account_number = account_number.trim();
-  BANK.account_name = account_name.trim().toUpperCase();
-  if (bank_name) BANK.bank_name = bank_name.trim();
-  if (bin) BANK.bin = bin.trim();
+  const updated = {
+    ...getBank(),
+    account_number: account_number.trim(),
+    account_name: account_name.trim().toUpperCase(),
+    bank_name: bank_name ? bank_name.trim() : getBank().bank_name,
+    bin: bin ? bin.trim() : getBank().bin
+  };
+  saveBank(updated);
   res.json({ success: true, message: 'Đã cập nhật thông tin ngân hàng' });
 });
 
