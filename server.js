@@ -398,40 +398,40 @@ app.get('/api/admin/export', requireAdmin, (req, res) => {
   res.send('﻿' + csv);
 });
 
-// ─── Casso webhook ───────────────────────────────────────────────────────────
+// ─── PayOS webhook ───────────────────────────────────────────────────────────
+const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY || 'e02942532d2ee7693ce794fd40db060e91ca2adaf0d4c0c8065f081c0fb7fd3a';
+const crypto = require('crypto');
+
+function verifyPayOSSignature(data, signature) {
+  const sortedKeys = Object.keys(data).sort();
+  const str = sortedKeys.map(k => `${k}=${data[k]}`).join('&');
+  const expected = crypto.createHmac('sha256', PAYOS_CHECKSUM_KEY).update(str).digest('hex');
+  return expected === signature;
+}
+
 app.post('/api/casso/webhook', (req, res) => {
-  console.log('[Casso] Webhook received:', JSON.stringify(req.body).slice(0, 500));
+  console.log('[PayOS] Webhook received:', JSON.stringify(req.body).slice(0, 500));
   const body = req.body;
 
-  // Casso gửi trực tiếp 1 giao dịch hoặc mảng trong data.records
-  let transactions = [];
-  if (Array.isArray(body)) {
-    transactions = body;
-  } else if (body.data?.records) {
-    transactions = body.data.records;
-  } else if (body.id || body.tid || body.amount) {
-    transactions = [body];
-  } else if (body.data && (body.data.id || body.data.amount)) {
-    transactions = [body.data];
-  }
+  // PayOS format: { code, desc, success, data: { description, amount, ... }, signature }
+  if (body.code === '00' && body.data) {
+    const d = body.data;
+    const desc = (d.description || '').toUpperCase();
+    const amount = d.amount || 0;
+    console.log('[PayOS] TX:', desc, amount);
 
-  const db = readDB();
-  let changed = false;
-  transactions.forEach(tx => {
-    const desc = (tx.description || tx.info || '').toUpperCase();
-    const amount = tx.amount || tx.value || 0;
-    console.log('[Casso] TX:', desc, amount);
+    const db = readDB();
     const order = db.orders.find(o => o.status === 'pending' && desc.includes(o.order_code.toUpperCase()));
     if (order && amount >= order.total_amount) {
       order.status = 'paid';
       order.paid_at = nowStr();
       order.updated_at = nowStr();
-      changed = true;
-      console.log('[Casso] Auto-paid:', order.order_code, amount);
+      writeDB(db);
+      console.log('[PayOS] Auto-paid:', order.order_code, amount);
     }
-  });
-  if (changed) writeDB(db);
-  res.json({ error: 0 });
+  }
+
+  res.json({ code: '00', desc: 'success' });
 });
 
 // ─── Start ───────────────────────────────────────────────────────────────────
