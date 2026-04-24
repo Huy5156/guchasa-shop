@@ -430,31 +430,35 @@ app.get('/api/admin/export', requireAdmin, (req, res) => {
   res.send('﻿' + csv);
 });
 
-// ─── PayOS webhook ───────────────────────────────────────────────────────────
+// ─── Casso Flow webhook ───────────────────────────────────────────────────────
 app.post('/api/casso/webhook', (req, res) => {
-  console.log('[PayOS] Webhook received:', JSON.stringify(req.body).slice(0, 500));
+  console.log('[Casso] Webhook received:', JSON.stringify(req.body).slice(0, 500));
   const body = req.body;
-  if (body.code === '00' && body.data) {
-    const d = body.data;
-    const desc = (d.description || '').toUpperCase();
-    const amount = d.amount || 0;
-    console.log('[PayOS] TX:', desc, amount);
-    const db = readDB();
+
+  // Casso Flow format: { error:0, data: [...transactions] }
+  const transactions = Array.isArray(body.data) ? body.data
+    : body.data ? [body.data]
+    : Array.isArray(body) ? body : [];
+
+  const db = readDB();
+  let changed = false;
+  transactions.forEach(tx => {
+    const desc = (tx.description || '').toUpperCase();
+    const amount = tx.amount || 0;
+    console.log('[Casso] TX:', desc, amount);
     const order = db.orders.find(o =>
-      o.status === 'pending' && (
-        desc.includes(o.order_code.toUpperCase()) ||
-        (o.payos_code && d.orderCode == o.payos_code)
-      )
+      o.status === 'pending' && desc.includes(o.order_code.toUpperCase())
     );
     if (order && amount >= order.total_amount) {
       order.status = 'paid';
       order.paid_at = nowStr();
       order.updated_at = nowStr();
-      writeDB(db);
-      console.log('[PayOS] Auto-paid:', order.order_code, amount);
+      changed = true;
+      console.log('[Casso] Auto-paid:', order.order_code, amount);
     }
-  }
-  res.json({ code: '00', desc: 'success' });
+  });
+  if (changed) writeDB(db);
+  res.json({ error: 0 });
 });
 
 // ─── Start ───────────────────────────────────────────────────────────────────
