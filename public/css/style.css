@@ -219,12 +219,13 @@ h2{font-size:1.8rem;margin:0 0 .6em;text-align:center}
   h2{font-size:1.4rem}
   .lead{font-size:.98rem}
   .price-new{font-size:2rem}
-  .topbar-row{padding:8px 14px}
-  .brand-mark{font-size:1.6rem}
-  .brand-sub{font-size:.6rem;letter-spacing:1px}
+  .topbar-row{padding:7px 12px;gap:8px}
+  .brand{min-width:0;flex:1}
+  .brand-mark{font-size:1.4rem}
+  .brand-sub{font-size:.55rem;letter-spacing:1px}
   .topbar nav a:not(.btn){display:none}
-  .topbar nav{display:flex;gap:6px;align-items:center}
-  .topbar nav a.btn{padding:7px 12px;font-size:.82rem;margin-left:0;border-radius:20px}
+  .topbar nav{display:flex;gap:5px;align-items:center;flex-shrink:0}
+  .topbar nav a.btn{padding:7px 10px;font-size:.78rem;margin-left:0;border-radius:20px;white-space:nowrap}
   .topbar nav .btn-ghost{border-width:1.5px}
   .hero-cta .btn{display:block;width:100%;margin:0 0 10px}
   .hero-trust{justify-content:center;font-size:.85rem;gap:10px 14px}
